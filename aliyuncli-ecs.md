@@ -1,5 +1,7 @@
-# Installation
-Check out the guideline here: https://github.com/aliyun/aliyun-cli ( using Google translator)
+# Getting started with Aliyun CLI
+
+## Installation
+Check out the guideline here: https://github.com/aliyun/aliyun-cli ( Folks can't read Chinese may need to use Google translator)
 
 Install python pip if necessary
 ```
@@ -19,7 +21,7 @@ sudo pip install "aliyun-python-sdk-oss"
 sudo pip install "aliyun-python-sdk-slb"
 ```
 
-## Confirm all SDKs available via aliyuncli
+### Confirm all SDKs available via aliyuncli
 ```
 aliyuncli
 ```
@@ -30,7 +32,8 @@ ecs                                       | oss
 rds                                       | slb
 ```
 
-## Configure access Key ID and access key secret (Find them in your console menu):
+### Configure access Key ID and access key secret (Find them in your console menu):
+
 ```
 aliyuncli configure
 # Aliyun Access Key ID [None]: <Your access key ID>
@@ -40,14 +43,14 @@ aliyuncli configure
 ```
 **NOTE**: Without specifying the default region ID, you won't be able to run any commands because the CLI doesn't know what API endpoint it should connect to.
 
-# Using ECS API to create a new instance
+## Use ECS API to create a new instance
 
 New let's check all available ECS commands and see some help
 ```
 aliyuncli ecs
 ```
 
-## Issue 1 - Required parameters
+### Issue 1 - Required parameters
 
 Find out how to use `CreateInstance` command by typing
 ```
@@ -68,7 +71,7 @@ aliyuncli ecs DescribeImages
 aliyuncli ecs DescribeInstanceTypes
 ```
 
-## Issue 2 - Available images at regions are incorrect?
+### Issue 2 - Available images at regions are incorrect?
 
 By having a quick look at what kind of instances are available in each regions. There are many differences between the regions' image lists:
 
@@ -152,9 +155,10 @@ $ aliyuncli ecs DescribeImages --RegionId us-west-1 | grep -e "ImageId"
     "ImageId": "centos5u8_64_40G_aliaegis_20160120.vhd",
 ```
 
-**Issue**: I am curious whether the results above means that `I can't create an ECS instance running CentOS in Shanghai`? The answer is **NO**. From the web console of `int.aliyun.com`, I was able to create it! So it seems like `aliyuncli` doesn't give us the correct information.
+I am curious whether the results above means that `I can't create an ECS instance running CentOS in Shanghai`? The answer is **NO**. From the web console of `int.aliyun.com`, I was able to create it! So it seems like `aliyuncli` doesn't give us the correct information.
 
-## Try creating a new security group
+
+### Try creating a new security group
 Create an empty security group in order to create the new instance. We can get back to configure it later:
 ```
 aliyuncli ecs CreateSecurityGroup
@@ -168,7 +172,7 @@ aliyuncli ecs CreateSecurityGroup
 
 TODO: Commands to configure the security group goes here...
 
-## Create a ECS instance and modify some attributes
+### Create a ECS instance and modify some attributes
 
 Now we are ready to create a new ECS instance!!
 
@@ -179,7 +183,7 @@ aliyuncli ecs CreateInstance \
   --InstanceName generated-by-cli \
   --Description "This is pretty cool" \
   --SecurityGroupId sg-23ewnvyt4
-
+  
 # The output will be the created instance's information:
 {
     "InstanceId": "i-23yi8tnhj",
@@ -210,7 +214,7 @@ aliyuncli ecs ModifyInstanceAttribute --Password "<Your root password>" --Instan
 aliyuncli ecs RebootInstance --InstanceId "i-23yi8tnhj"
 ```
 
-## Configure internet connection
+### Network configuration
 
 At this point **the new ECS instance can't be accessed using `ping` nor `SSH`**. Right, we haven't assigned a public IP to it!
 
@@ -226,6 +230,7 @@ aliyuncli ecs AllocatePublicIpAddress --InstanceId i-23yi8tnhj
 ```
 
 Looks ok, but... nothing changes? Why?
+
 
 -----------------
 Confirm disk spec & modify 
