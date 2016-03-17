@@ -71,9 +71,11 @@ aliyuncli ecs DescribeImages
 aliyuncli ecs DescribeInstanceTypes
 ```
 
-### Issue 2 - Available images at regions are incorrect?
+### Issue 2 - Pagination Suprise
 
-By having a quick look at what kind of instances are available in each regions. There are many differences between the regions' image lists:
+At first glance it may seem like aliyun API is not exposing all of the available data to aliyuncli.
+
+For instance, by having a quick look at what kind of instances are available in each regions you may notice that there are many differences between the regions' image lists:
 
 ```
 $ aliyuncli ecs DescribeImages --RegionId cn-hangzhou | grep -e "ImageId"
@@ -155,8 +157,30 @@ $ aliyuncli ecs DescribeImages --RegionId us-west-1 | grep -e "ImageId"
     "ImageId": "centos5u8_64_40G_aliaegis_20160120.vhd",
 ```
 
-I am curious whether the results above means that `I can't create an ECS instance running CentOS in Shanghai`? The answer is **NO**. From the web console of `int.aliyun.com`, I was able to create it! So it seems like `aliyuncli` doesn't give us the correct information.
+Does this mean that `I can't create an ECS instance running CentOS in Shanghai`? The answer would appear to be **NO**, but is this really correct? From the web console of `int.aliyun.com`, I was able to create it! So it seems like `aliyuncli` doesn't give us the correct information.
 
+The reason for this pagination! The astute user might have noticed that the above examples return record sets of exactly 10 images.
+
+To display more than the initial 10 items you need to use the pagination arguments which are currently undocumented.
+
+``
+--PageSize 100     : Displays up to 100 records per page
+--PageNumber 5     : Displays the first 5 pages of results
+``
+
+Let's try the image listing again with the correct pagination settings.
+
+```
+$ aliyuncli ecs DescribeImages --RegionId cn-shanghai --PageSize 100 | grep ImageId | grep centos
+                "ImageId": "centos6u5_64_40G_aliaegis_20160222.vhd", 
+                "ImageId": "centos6u5_32_40G_aliaegis_20160222.vhd", 
+                "ImageId": "centos7u0_64_40G_aliaegis_20160120.vhd", 
+                "ImageId": "centos5u8_64_40G_aliaegis_20160120.vhd", 
+                "ImageId": "centos5u10_64_40G_aliaegis_20160120.vhd", 
+                "ImageId": "centos5u10_32_40G_aliaegis_20160120.vhd", 
+```
+
+We can now see that the centos images are indeed available in Shanghai. Of course this wasn't obvious due to the undocumented --PageSize parameter.
 
 ### Try creating a new security group
 Create an empty security group in order to create the new instance. We can get back to configure it later:
