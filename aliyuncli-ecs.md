@@ -261,8 +261,10 @@ Still no luck... How about restarting the instance?
 aliyuncli ecs RebootInstance --InstanceId i-283shc9ic
 ```
 
-Voila!! Both Ping and SSH work perfectly!!
+Voila!! Both Ping and SSH work perfectly!! The only sad thing left is there is no SSH key-based authentication :-(
 
 ## Conclusion
 - `aliyuncli` is functional, but it takes time to understand the required parameters and necessary steps to achieve the goal. Reading the API documentation is always a good idea when we get lost.
 - There are mismatches between what `aliyuncli` shows and what we can see from the console (eg: image list)... Don't actually know why...
+- SSH using root password is quite awkwark...
+- Major modifications on the ECS instances requires rebooting to take effect (e.g: Root password change, public IP allocation)
