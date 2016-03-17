@@ -170,7 +170,27 @@ aliyuncli ecs CreateSecurityGroup
 }
 ```
 
-TODO: Commands to configure the security group goes here...
+Configure policies for the security group:
+
+```
+aliyuncli ecs AuthorizeSecurityGroup --IpProtocol all --SecurityGroupId sg-23ewnvyt4 --PortRange "-1/-1" --SourceCidrIp "0.0.0.0/0" --Policy accept --NicType internet
+
+# TODO: Add a command to configure internet outflow connection
+```
+
+**ISSUE 1**: Can't configure internet outflow connection
+
+**ISSUE 2** It's quite funny when an error occurs. For example the error message below doesn't relate to the error code at all! The message looks ok, but the error code is completely wrong!
+
+```
+aliyuncli ecs AuthorizeSecurityGroup --IpProtocol tcp --SecurityGroupId sg-28heoi062 --PortRange '-1/-1' --SourceCidrIp "0.0.0.0/0" --Policy accept --NicType internet
+{
+    "Code": "InvalidIpProtocol.Malformed", 
+    "Message": "The specified parameter \"PortRange\" is not valid.", 
+    "HostId": "ecs-cn-hangzhou.aliyuncs.com", 
+    "RequestId": "81D2C6A5-BC4B-4040-BFAE-A39567286A85"
+}
+```
 
 ### Create a ECS instance and modify some attributes
 
@@ -229,11 +249,13 @@ aliyuncli ecs AllocatePublicIpAddress --InstanceId i-23yi8tnhj
 }
 ```
 
-Looks ok, but... nothing changes? Why?
+Looks ok, but... nothing changes? Why? According to the ECS API documentation, we need to specify the chargeType and max bandwidth for the instance. Let's give it a try:
 
+```
+aliyuncli ecs ModifyInstanceNetworkSpec --InternetMaxBandwidthOut 100 --InstanceId i-283shc9ic
+aliyuncli ecs ModifyInstanceAttribute --InternetChargeType PayByTraffic --InstanceId i-283shc9ic
+```
 
------------------
-Confirm disk spec & modify 
-```
-aliyuncli ecs DescribeDisks --InstanceId i-23yi8tnhj
-```
+Still no luck ...
+
+TO BE CONTINUED...
