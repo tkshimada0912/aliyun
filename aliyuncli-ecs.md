@@ -256,6 +256,13 @@ aliyuncli ecs ModifyInstanceNetworkSpec --InternetMaxBandwidthOut 100 --Instance
 aliyuncli ecs ModifyInstanceAttribute --InternetChargeType PayByTraffic --InstanceId i-283shc9ic
 ```
 
-Still no luck ...
+Still no luck... How about restarting the instance?
+```
+aliyuncli ecs RebootInstance --InstanceId i-283shc9ic
+```
 
-TO BE CONTINUED...
+Voila!! Both Ping and SSH work perfectly!!
+
+## Conclusion
+- `aliyuncli` is functional, but it takes time to understand the required parameters and necessary steps to achieve the goal. Reading the API documentation is always a good idea when we get lost.
+- There are mismatches between what `aliyuncli` shows and what we can see from the console (eg: image list)... Don't actually know why...
