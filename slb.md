@@ -108,9 +108,61 @@ HTTPではCookieに対応したL7 proxy動作によるSLBになっていたが�
 keep sessionを有効化すると、TCPの場合、IPベースの固定しかできないと表示される（Cookie等を入れることができないため）。
 また、アクセス元IPアドレスが直接ログで見えるようになる（DNATによる負荷分散動作）。
 
+    202.45.12.145 - - [27/May/2016:13:30:25 +0800] "GET /test.html HTTP/1.1" 200 2 "-" "curl/7.43.0" "-"
+    202.45.12.145 - - [27/May/2016:13:30:26 +0800] "GET /test.html HTTP/1.1" 200 2 "-" "curl/7.43.0" "-"
+    202.45.12.145 - - [27/May/2016:13:30:26 +0800] "GET /test.html HTTP/1.1" 200 2 "-" "curl/7.43.0" "-"
+    202.45.12.145 - - [27/May/2016:13:30:27 +0800] "GET /test.html HTTP/1.1" 200 2 "-" "curl/7.43.0" "-"
+    202.45.12.145 - - [27/May/2016:13:30:28 +0800] "GET /test.html HTTP/1.1" 200 2 "-" "curl/7.43.0" "-"
+    202.45.12.145 - - [27/May/2016:13:30:29 +0800] "GET /test.html HTTP/1.1" 200 2 "-" "curl/7.43.0" "-"
+    202.45.12.145 - - [27/May/2016:13:30:33 +0800] "GET /test.html HTTP/1.1" 200 2 "-" "curl/7.43.0" "-"
+    202.45.12.145 - - [27/May/2016:13:31:16 +0800] "GET /test.html HTTP/1.1" 200 2 "-" "curl/7.43.0" "-"
+
 経路としては、eth0（private）から入り、default routeに従い、戻りはeth1（Public）から出て行く非対称経路になる。
 
 この場合も、「Obtain true IP」は「open(default)」から変更できない。
+
+ドキュメントには「Backend ECS configuration」として、一般的なSLB環境下のECS設定（OS設定）が指定されているが、
+おそらくClassic Networkではこれを指定することは必要ないと思われる。
+
+## Classic network with Intranet IP address
+
+次はintranetを試してみる。
+
+<img src="https://drive.google.com/uc?export=view&id=0Bxf736wnLrNVcXViVFdEQUU4NjQ">
+
+intranetを指定すると、ClassicとVPCが指定できるが、ここではClassicを選ぶ。
+
+Listnerの設定で、HTTPを指定した場合、普通にアクセスが可能。ECSインスタンスからIntranetアドレス経由で（100.X側）
+アクセスすることができる。
+
+ただし、Listnerの設定でTCP、UDPを指定したL4設定でのアクセスは不可能。これはFAQ「Why does the endpoint fail to get through when I telnet the backend ECS of 4-layer SLB?」に記載されている通り、戻りパケットがSLBに戻らないため。
+おそらくVPCではこれを回避する経路が組めると想定する。
+
+## VPC network with Intranet IP address
+
+VPC配下にECSを配置して、SLBからアクセスさせる。
+
+まず、default vswitch以下に2台、別のvswitch以下に１台のECSインスタンスを起動。
+
+<img src="https://drive.google.com/uc?export=view&id=0Bxf736wnLrNVMV9qdkNsUk1UN1U">
+
+SLBのインスタンスを起こす。NW設定は「Intranet」の「VPC」で、default vrouter、default vswitchを指定。
+
+<img src="https://drive.google.com/uc?export=view&id=0Bxf736wnLrNVNkxlWjZha3E2RlU">
+
+これでSLBができるが、このSLBインスタンスはVIPがvswitch以下に現れる。
+
+<img src="https://drive.google.com/uc?export=view&id=0Bxf736wnLrNVNFdhOWpDbzMyYnM">
+
+ちょっと想定外な構成。とりあえずListenerを設定して、まずはHTTP（L7）を設定してみる。
+
+<img src="https://drive.google.com/uc?export=view&id=0Bxf736wnLrNVVGxhdDQyM1hRY0k">
+
+同じvrouter以下なら、vswitchが別でもBackend Serversに指定は可能。
+
+HTTP(L7)負荷分散を設定すると、同じvswitch配下からもSLB経由でアクセス可能。
+
+
 
 
 
